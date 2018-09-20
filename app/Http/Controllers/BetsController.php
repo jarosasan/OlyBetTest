@@ -37,7 +37,7 @@ class BetsController extends Controller
         }
 
         //Random sleep after validation
-         sleep(rand(0, 3));
+         sleep(rand(0, 30));
 
             $player = Player::find($request['player_id']);
             //If player don't exist, create new player

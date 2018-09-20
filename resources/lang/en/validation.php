@@ -125,9 +125,29 @@ return [
     */
 
     'custom' => [
-        'attribute-name' => [
-            'rule-name' => 'custom-message',
+        'player_id'=>[
+            'required' => ['code'=>1, 'message'=>'Betslip structure mismatch'],
         ],
+        'stake_amount' => [
+            'required'      => ['code'=>1, 'message'=>'Betslip structure mismatch'],
+            'min'           => ['code'=>2, 'message'=>'Minimum stake amount is :min'],
+            'max'           => ['code'=>3, 'message'=>'Maximum stake amount is :max'],
+            'regex'         => ['code'=>1, 'message'=>'Betslip structure mismatch'],
+            'numeric'         => ['code'=>1, 'message'=>'Betslip structure mismatch'],
+        ],
+        'selections' => [
+            'required'        => ['code'=>1, 'message'=>'Betslip structure mismatch'],
+            'min'             => ['code'=>4, 'message'=>'Minimum number of selections is :min'],
+            'max'             => ['code'=>5, 'message'=>'Maximum number of selections is :max'],
+        ],
+        'selections.*.id' => [
+            'required'  => ['code'=>5, 'message'=>'Minimum number of selections is :min'],
+            'numeric'       => ['code'=>1, 'message'=>'Betslip structure mismatch'],
+            'distinct'  => ['code'=>8, 'message'=>'Duplicate selections found'],
+        ],
+        'win_amount' => [
+            'max'       => ['code'=>9, 'message'=>'Maximum win amount is :max'],
+        ]
     ],
 
     /*
@@ -141,6 +161,7 @@ return [
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+    ],
 
 ];

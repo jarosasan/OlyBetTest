@@ -12,6 +12,6 @@ class Bet extends Model
      * @var array
      */
     protected $fillable = [
-        'stake_amount',
+        'stake_amount', 'created_at',
     ];
 }

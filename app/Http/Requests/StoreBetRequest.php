@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\JsonResponse;
+use Zend\Diactoros\Request;
 
 class StoreBetRequest extends FormRequest
 {
@@ -25,11 +27,12 @@ class StoreBetRequest extends FormRequest
     public function rules()
     {
         return [
-            'payer_id'          => 'required',
-            'stake_amount'      => 'numeric|required|regex:/^(\b\d{1,6})*(\.\d{1.2})?\b/|min:0.3|max:10000',
-            'selections'        => 'required',
-            'selections.*.id'   => 'required|min:1|max:20|numeric|distinct',
-            'selections.*.odds' => 'numeric|required|min:1|max:10000',
+            'player_id'         => 'required',
+            'stake_amount'      => 'required|regex:/^\d+(\.\d{1,2})?$/|numeric|min:0.3|max:10000',
+            'selections'        => 'required|array|min:1|max:20',
+            'selections.*.id'   => 'required|distinct|numeric',
+            'selections.*.odds' => 'required|min:1|max:10000|regex:/^\d+(\.\d{1,3})?$/',
+            'win_amount'        => 'numeric|max:20000',
         ];
     }
 
@@ -37,24 +40,70 @@ class StoreBetRequest extends FormRequest
     public function messages()
     {
         return [
-            'payer.required'             => 'Betslip structure mismatch',
-            'stake_amount.required'      => 'Minimum stake amount is :min',
-            'stake_amount.min'           => 'Minimum stake amount is :min',
-            'stake_amount.max'           => 'Maximum stake amount is :max',
-            'selections.required'        => 'Betslip structure mismatch',
-            'selections.*.id.required'   => 'Minimum number of selections is :min',
-            'selections.*.id.min'        => 'Minimum number of selections is :min',
-            'selections.*.id.max'        => 'Maximum number of selections is :max',
-            'selections.*.id.distinct'   => 'Duplicate selections found',
-            'selections.*.odds.required' => 'Minimum odds are :min',
-            'selections.*.odds.min'      => 'Minimum odds are :min',
-            'selections.*.odds.max'      => 'Maximum odds are :max',
+            'player.required'               => ['code'=>1, 'message'=>'Betslip structure mismatch'],
+            'stake_amount.required'         => ['code'=>1, 'message'=>'Betslip structure mismatch'],
+            'stake_amount.regex'            => ['code'=>0, 'message'=>'Unknown error'],
+            'selections.required'           => ['code'=>1, 'message'=>'Betslip structure mismatch'],
+            'selections.min'                => ['code'=>4, 'message'=>'Minimum number of selections is :min'],
+            'selections.max'                => ['code'=>5, 'message'=>'Maximum number of selections is :max'],
+            'selections.*.id.required'      => ['code'=>5, 'message'=>'Minimum number of selections is :min'],
+            'selections.*.id.numeric'       => ['code'=>0, 'message'=>'Unknown error'],
+            'selections.*.id.distinct'      => ['code'=>8, 'message'=>'Duplicate selections found'],
+            'selections.*.odds.required'    => ['code'=>1, 'message'=>'Betslip structure mismatch'],
+            'selections.*.odds.min'         => ['code'=>6, 'message'=>'Minimum odds are :min'],
+            'selections.*.odds.max'         => ['code'=>7, 'message'=>'Maximum odds are :max'],
+            'selections.*.odds.regex'       => ['code'=>0, 'message'=>'Unknown error'],
+            'selections.*.odds.numeric'     => ['code'=>0, 'message'=>'Unknown error'],
         ];
     }
 
+    public function errorsRespons( $request)
+    {
+        $valid = Validator::make($request->all(), $this->rules(), $this->messages());
 
+        if ($valid->fails()) {
+            $errorMessages = [];
 
+            //Get global error messages
+            foreach ($request->all() as $key => $value) {
+                foreach ($valid->errors()->messages() as $k => $v) {
+                    if ($k == $key) {
+                        $errorMessages[] = $v[0];
+                    }
+                }
+            }
 
+            //Get selections error messages
+            for ($i = 0; $i < count($request['selections']); $i++) {
+                $t = $request['selections'][$i];
+ ;               foreach ($valid->errors()->messages() as $k => $v) {
+                    if ($k == 'selections.' . $i . '.id' || $k == 'selections.' . $i . '.odds') {
+                        if (!empty($v)) {
+                            $t['errors'] = $v;
+                        }
+                    }
+                }
+                $selections[] = $t;
 
+            }
 
+            //Create collection to response
+            if (count($errorMessages) > 0) {
+                $collection = collect([
+                    'player_id' => $request['player_id'],
+                    'stake_amount' => $request['stake_amount'],
+                    'errors' => $errorMessages,
+                    'selections' => $selections
+                ]);
+            } else {
+                $collection = collect([
+                    'player_id' => $request['player_id'],
+                    'stake_amount' => $request['stake_amount'],
+                    'selections' => $selections
+                ]);
+            }
+            return $collection;
+        }
+        return false;
+    }
 }

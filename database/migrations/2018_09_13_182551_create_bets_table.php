@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateBalanceTransactionTable extends Migration
+class CreateBetsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,9 @@ class CreateBalanceTransactionTable extends Migration
      */
     public function up()
     {
-        Schema::create('balance_transaction', function (Blueprint $table) {
+        Schema::create('bets', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('palyer_id');
-            $table->float('amount', 10, 2);
-            $table->float('amount_before', 10, 2);
+            $table->string('stake_amount');
             $table->timestamps();
         });
     }
@@ -29,6 +27,6 @@ class CreateBalanceTransactionTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('balance_transaction');
+        Schema::dropIfExists('bets');
     }
 }

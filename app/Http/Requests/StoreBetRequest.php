@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Request;
 
 class StoreBetRequest extends FormRequest
 {
@@ -59,8 +60,16 @@ class StoreBetRequest extends FormRequest
     {
         $valid = Validator::make($request->all(), $this->rules(), $this->messages());
 
-        if ($valid->fails()) {
+        //Validate Player Balance
+        $balanceValid = Validator::make($request->all(), [
+            'balance' => 'integer|min:'.$request['stake_amount'].'',
+        ]);
+
+        if ($valid->fails() || $balanceValid->fails()) {
             $errorMessages = [];
+            foreach ($balanceValid->errors()->messages() as $k => $v) {
+                    $errorMessages[] = $v[0];
+            }
 
             //Get global error messages
             foreach ($request->all() as $key => $value) {
@@ -70,6 +79,8 @@ class StoreBetRequest extends FormRequest
                     }
                 }
             }
+
+
 
             //Get selections error messages
             for ($i = 0; $i < count($request['selections']); $i++) {
@@ -82,7 +93,6 @@ class StoreBetRequest extends FormRequest
                     }
                 }
                 $selections[] = $t;
-
             }
 
             //Create collection to response

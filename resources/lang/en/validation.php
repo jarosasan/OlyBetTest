@@ -147,7 +147,10 @@ return [
         ],
         'win_amount' => [
             'max'       => ['code'=>9, 'message'=>'Maximum win amount is :max'],
-        ]
+        ],
+        'balance' => [
+            'min' => ['code'=>11, 'message'=>'Insufficient balance'],
+        ],
     ],
 
     /*

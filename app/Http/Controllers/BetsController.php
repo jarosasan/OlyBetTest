@@ -29,6 +29,17 @@ class BetsController extends Controller
             $winAmount= $winAmount  * $selection['odds'];
         }
         $request['win_amount'] = $winAmount;
+
+        //Player balance
+        $player = Player::find($request['player_id']);
+
+        //If player don't exist, create new player
+        if (empty($player)) {
+            $player = Player::create(['id' => $request['player_id']]);
+        }
+        $balance = $player->balance;
+        $request['balance'] = $balance;
+
         //Validate Request
         $storeBetRequest = new StoreBetRequest;
 
@@ -37,13 +48,15 @@ class BetsController extends Controller
         }
 
         //Random sleep after validation
-         sleep(rand(0, 3));
+         sleep(rand(0, 30));
 
             $player = Player::find($request['player_id']);
+
             //If player don't exist, create new player
             if (empty($player)) {
                 $player = Player::create(['id' => $request['player_id']]);
             }
+
             //Create new bet
             $bet = Bet::create(['stake_amount' => $request['stake_amount']]);
 
@@ -51,6 +64,7 @@ class BetsController extends Controller
             for ($i = 0; $i < count($request['selections']); $i++) {
                 BetSelection::create(['bet_id' => $bet->id, 'selection_id' => $request['selections'][$i]['id'], 'odds' => $request['selections'][$i]['odds']]);
             }
+
             //Create Balance transaction
             $playerTransaction = BalanceTransaction::where('player_id', $player->id)->first();
             if (empty($playerTransaction)) {

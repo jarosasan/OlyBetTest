@@ -10,9 +10,6 @@ use App\Player;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Exception;
-use Illuminate\Support\Facades\Validator;
-
 
 
 class BetsController extends Controller
@@ -32,7 +29,7 @@ class BetsController extends Controller
             $winAmount= $winAmount  * $selection['odds'];
         }
         $request['win_amount'] = $winAmount;
-
+        //Validate Request
         $storeBetRequest = new StoreBetRequest;
 
         if ($storeBetRequest->errorsRespons($request)){

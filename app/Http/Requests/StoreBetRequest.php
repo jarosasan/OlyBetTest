@@ -4,8 +4,6 @@ namespace App\Http\Requests;
 
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\JsonResponse;
-use Zend\Diactoros\Request;
 
 class StoreBetRequest extends FormRequest
 {
